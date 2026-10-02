@@ -1,0 +1,208 @@
+@model Entity.Stajyer
+@{
+    ViewData["Title"] = "Bilgilerimi Düzenle";
+    var birimler = ViewBag.Birimler as List<Entity.Birim> ?? new List<Entity.Birim>();
+}
+<style>
+    .duzenle-page .card-header.bg-primary {
+        background-color: #e8eef5 !important;
+    }
+    .duzenle-page .card-header.bg-primary h5 {
+        color: #2a5298 !important;
+    }
+    .duzenle-page .card-header.bg-info {
+        background-color: #e8eef5 !important;
+    }
+    .duzenle-page .card-header.bg-info h5 {
+        color: #2a5298 !important;
+    }
+    .duzenle-page .btn-primary {
+        background-color: #2a5298;
+        border-color: #2a5298;
+        color: #fff;
+    }
+    .duzenle-page .btn-primary:hover {
+        background-color: #1a3a6e;
+        border-color: #1a3a6e;
+        color: #fff;
+    }
+</style>
+<div class="container-fluid duzenle-page">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-4">Bilgilerimi Düzenle</h2>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form asp-action="Duzenle" method="post">
+        @Html.AntiForgeryToken()
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Staj Bilgileri</h5>
+                    </div>
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="BaslangicTarihi" class="form-label fw-bold">Staj Başlangıç Tarihi</label>
+                                <input asp-for="BaslangicTarihi" type="date" class="form-control" />
+                                <small class="text-muted">Boş bırakılırsa, kayıt tarihiniz otomatik kullanılır.</small>
+                                <span asp-validation-for="BaslangicTarihi" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="BitisTarihi" class="form-label fw-bold">Staj Bitiş Tarihi</label>
+                                <input asp-for="BitisTarihi" type="date" class="form-control" />
+                                <span asp-validation-for="BitisTarihi" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="BirimId" class="form-label fw-bold">Birim</label>
+                                <select asp-for="BirimId" class="form-select">
+                                    <option value="">-- Birim Seçin --</option>
+                                    @foreach (var birim in birimler)
+                                    {
+                                        <option value="@birim.Id">@birim.Ad</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="BirimId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Toplam İş Günü (Otomatik Hesaplanır)</label>
+                                <input type="text" class="form-control" id="toplamIsGunu" readonly placeholder="Başlangıç ve bitiş tarihini seçin" />
+                                <small class="text-muted">Hafta sonları hariç hesaplanır</small>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <h6 class="mb-3">Eğitim Bilgileri</h6>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="Okul" class="form-label fw-bold">Okul</label>
+                                <input asp-for="Okul" class="form-control" />
+                                <span asp-validation-for="Okul" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Bolum" class="form-label fw-bold">Bölüm</label>
+                                <input asp-for="Bolum" class="form-control" />
+                                <span asp-validation-for="Bolum" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Sinif" class="form-label fw-bold">Sınıf</label>
+                                <input asp-for="Sinif" class="form-control" />
+                                <span asp-validation-for="Sinif" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Bilgi</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">
+                            <strong>Not:</strong> Staj başlangıç ve bitiş tarihlerini değiştirdiğinizde, toplam iş günü otomatik olarak hesaplanacaktır. Hafta sonları (Cumartesi ve Pazar) iş günü sayısına dahil edilmez.
+                        </p>
+                        <hr />
+                        <p class="text-muted small mb-0">
+                            <strong>Mevcut Bilgiler:</strong><br />
+                            @{
+                                var mevcutBaslangic = Model.BaslangicTarihi == default(DateTime) || Model.BaslangicTarihi.Year < 2000 ? "Belirtilmemiş" : Model.BaslangicTarihi.ToString("dd.MM.yyyy");
+                                var mevcutBitis = Model.BitisTarihi == default(DateTime) || Model.BitisTarihi.Year < 2000 ? "Belirtilmemiş" : Model.BitisTarihi.ToString("dd.MM.yyyy");
+                                var mevcutBirim = Model.BirimId == 0 || Model.Birim == null ? "Atanmamış" : Model.Birim.Ad;
+                            }
+                            Başlangıç: @mevcutBaslangic<br />
+                            Bitiş: @mevcutBitis<br />
+                            Birim: @mevcutBirim<br />
+                            @if (Model.User?.OlusturmaTarihi.HasValue == true)
+                            {
+                                <span class="text-info">Kayıt Tarihiniz: @Model.User.OlusturmaTarihi.Value.ToString("dd.MM.yyyy")</span>
+                            }
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle me-2" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 2.384 4.323a.75.75 0 0 1 1.06-1.061l4.033 4.033 3.473-4.425a.267.267 0 0 1 .02-.022c.14-.09.32-.16.5-.16a.5.5 0 0 1 .5.5c0 .18-.07.36-.16.5z"/>
+                    </svg>
+                    Kaydet
+                </button>
+                <a asp-action="Bilgilerim" class="btn btn-secondary ms-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle me-2" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                    İptal
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        
+        function hesaplaIsGunu() {
+            var baslangic = document.getElementById('BaslangicTarihi').value;
+            var bitis = document.getElementById('BitisTarihi').value;
+            
+            if (baslangic && bitis) {
+                var baslangicDate = new Date(baslangic);
+                var bitisDate = new Date(bitis);
+                
+                if (bitisDate < baslangicDate) {
+                    document.getElementById('toplamIsGunu').value = 'Bitiş tarihi başlangıçtan önce olamaz!';
+                    return;
+                }
+                
+                var toplamGun = 0;
+                var tarih = new Date(baslangicDate);
+                
+                while (tarih <= bitisDate) {
+                    var gun = tarih.getDay();
+                    
+                    if (gun !== 0 && gun !== 6) {
+                        toplamGun++;
+                    }
+                    tarih.setDate(tarih.getDate() + 1);
+                }
+                
+                document.getElementById('toplamIsGunu').value = toplamGun + ' gün';
+            } else {
+                document.getElementById('toplamIsGunu').value = '';
+            }
+        }
+        
+        document.getElementById('BaslangicTarihi').addEventListener('change', hesaplaIsGunu);
+        document.getElementById('BitisTarihi').addEventListener('change', hesaplaIsGunu);
+        
+        
+        window.addEventListener('load', function() {
+            hesaplaIsGunu();
+        });
+    </script>
+}

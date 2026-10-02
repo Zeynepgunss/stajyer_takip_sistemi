@@ -1,0 +1,74 @@
+@model List<Entity.Stajyer>
+@{
+    ViewData["Title"] = "Genel Yetenek Haritası";
+    var tumYetenekler = ViewBag.TumYetenekler as List<Entity.Yetenek> ?? new List<Entity.Yetenek>();
+}
+
+<div class="container">
+    <h2 class="mb-4">Genel Yetenek Haritası</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th>Stajyer</th>
+                            <th>Birim</th>
+                            @foreach (var yetenek in tumYetenekler)
+                            {
+                                <th class="text-center">@yetenek.Ad</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stajyer in Model)
+                        {
+                            <tr>
+                                <td><strong>@stajyer.User?.TamAd</strong></td>
+                                <td>@stajyer.Birim?.Ad</td>
+                                @foreach (var yetenek in tumYetenekler)
+                                {
+                                    var stajyerYetenek = stajyer.Yetenekler.FirstOrDefault(sy => sy.YetenekId == yetenek.Id);
+                                    <td class="text-center">
+                                        @if (stajyerYetenek != null)
+                                        {
+                                            <span class="badge bg-success">@stajyerYetenek.Seviye/5</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h5>Yetenek İstatistikleri</h5>
+        <div class="row">
+            @foreach (var yetenek in tumYetenekler)
+            {
+                var buYetenekteStajyerSayisi = Model.Count(s => s.Yetenekler.Any(sy => sy.YetenekId == yetenek.Id));
+                var ortalamaSeviye = Model
+                    .Where(s => s.Yetenekler.Any(sy => sy.YetenekId == yetenek.Id))
+                    .SelectMany(s => s.Yetenekler.Where(sy => sy.YetenekId == yetenek.Id))
+                    .Average(sy => (double?)sy.Seviye) ?? 0;
+                <div class="col-md-3 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6>@yetenek.Ad</h6>
+                            <p class="mb-1">@buYetenekteStajyerSayisi stajyer</p>
+                            <p class="mb-0">Ortalama Seviye: @ortalamaSeviye.ToString("F1")/5</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,81 @@
+@model List<stajyer_takip.Models.BirimOzetiItem>
+@{
+    ViewData["Title"] = "Birim Özeti";
+    var toplamBirim = ViewBag.ToplamBirim as int? ?? 0;
+    var toplamStajyer = ViewBag.ToplamStajyer as int? ?? 0;
+}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Birim Özeti</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">&larr; Panele Dön</a>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Toplam Birim</h5>
+                    <h2 class="mb-0">@toplamBirim</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Tüm Birimlerdeki Toplam Stajyer</h5>
+                    <h2 class="mb-0">@toplamStajyer</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="mb-0">Birimlere Göre Stajyer Sayıları</h5>
+            <input type="text" id="birimArama" class="form-control form-control-sm" style="max-width: 260px;" placeholder="Birim adı ile ara..." autocomplete="off" />
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Birim Adı</th>
+                            <th>Stajyer Sayısı</th>
+                        </tr>
+                    </thead>
+                    <tbody id="birimTbody">
+                        @foreach (var b in Model)
+                        {
+                            <tr class="birim-satir" data-ara="@b.Ad">
+                                <td>@b.Ad</td>
+                                <td><strong>@b.StajyerSayisi</strong></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (!Model.Any())
+            {
+                <p class="text-muted mb-0">Kayıt bulunamadı.</p>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var input = document.getElementById('birimArama');
+    var tbody = document.getElementById('birimTbody');
+    if (!input || !tbody) return;
+    function filtrele() {
+        var metin = (input.value || '').trim().toLowerCase();
+        var satirlar = tbody.querySelectorAll('tr.birim-satir');
+        satirlar.forEach(function (tr) {
+            var ara = (tr.getAttribute('data-ara') || '').toLowerCase();
+            tr.style.display = (metin === '' || ara.indexOf(metin) !== -1) ? '' : 'none';
+        });
+    }
+    input.addEventListener('input', filtrele);
+    input.addEventListener('keyup', filtrele);
+})();
+</script>
+}

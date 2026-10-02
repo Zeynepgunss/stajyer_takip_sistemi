@@ -1,0 +1,57 @@
+@model Entity.Birim
+@{
+    ViewData["Title"] = "Birim Düzenle";
+}
+
+<div class="container">
+    <h2 class="mb-4">Birim Düzenle</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (ViewData.ModelState.ErrorCount > 0)
+    {
+        <div class="alert alert-danger">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <p>@error.ErrorMessage</p>
+            }
+        </div>
+    }
+
+    <form asp-action="BirimDuzenle" method="post">
+        <input type="hidden" asp-for="Id" />
+        
+        <div class="mb-3">
+            <label asp-for="Ad" class="form-label">Birim Adı</label>
+            <input asp-for="Ad" class="form-control" required />
+            <span asp-validation-for="Ad" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Aciklama" class="form-label">Açıklama</label>
+            <textarea asp-for="Aciklama" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Aciklama" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Kontenjan" class="form-label">Kontenjan</label>
+            <input asp-for="Kontenjan" type="number" class="form-control" min="1" required />
+            <span asp-validation-for="Kontenjan" class="text-danger"></span>
+            <small class="form-text text-muted">Mevcut stajyer sayısından az olamaz.</small>
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Kaydet</button>
+            <a asp-action="BirimYonetimi" class="btn btn-secondary">İptal</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

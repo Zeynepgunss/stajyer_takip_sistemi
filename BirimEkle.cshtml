@@ -1,0 +1,37 @@
+@model Entity.Birim
+@{
+    ViewData["Title"] = "Birim Ekle";
+}
+
+<div class="container">
+    <h2 class="mb-4">Yeni Birim Ekle</h2>
+
+    <form asp-action="BirimEkle" method="post">
+        <div class="mb-3">
+            <label asp-for="Ad" class="form-label">Birim Adı</label>
+            <input asp-for="Ad" class="form-control" required />
+            <span asp-validation-for="Ad" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Aciklama" class="form-label">Açıklama</label>
+            <textarea asp-for="Aciklama" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Aciklama" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Kontenjan" class="form-label">Kontenjan</label>
+            <input asp-for="Kontenjan" type="number" class="form-control" min="1" required />
+            <span asp-validation-for="Kontenjan" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Kaydet</button>
+            <a asp-action="BirimYonetimi" class="btn btn-secondary">İptal</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

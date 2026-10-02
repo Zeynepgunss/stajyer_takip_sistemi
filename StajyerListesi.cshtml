@@ -1,0 +1,83 @@
+@model List<Entity.Stajyer>
+@{
+    ViewData["Title"] = ViewBag.Baslik ?? "Stajyer Listesi";
+    var baslik = ViewBag.Baslik as string ?? "Stajyer Listesi";
+    var aktifOnly = ViewBag.AktifOnly as bool? ?? false;
+}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">@baslik</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">&larr; Panele Dön</a>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <p class="text-muted mb-0">Toplam: <strong id="stajyerToplam">@Model.Count</strong> stajyer</p>
+                <input type="text" id="stajyerArama" class="form-control form-control-sm" style="max-width: 280px;" placeholder="Stajyer adı, birim veya durum ile ara..." autocomplete="off" />
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Stajyer</th>
+                            <th>Birim</th>
+                            <th>Başlangıç</th>
+                            <th>Bitiş</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stajyerTbody">
+                        @foreach (var s in Model)
+                        {
+                            var stajBitti = s.BitisTarihi != default(DateTime) && s.BitisTarihi.Year >= 2000 && s.BitisTarihi < DateTime.Now;
+                            var durum = stajBitti ? "Staj bitti" : (s.Aktif ? "Aktif" : "Pasif");
+                            <tr class="stajyer-satir" data-ara="@((s.User?.TamAd ?? "-") + " " + (s.Birim?.Ad ?? "-") + " " + durum)">
+                                <td>@(s.User?.TamAd ?? "-")</td>
+                                <td>@(s.Birim?.Ad ?? "-")</td>
+                                <td>@(s.BaslangicTarihi != default && s.BaslangicTarihi.Year >= 2000 ? s.BaslangicTarihi.ToString("dd.MM.yyyy") : "-")</td>
+                                <td>@(s.BitisTarihi != default && s.BitisTarihi.Year >= 2000 ? s.BitisTarihi.ToString("dd.MM.yyyy") : "-")</td>
+                                <td>
+                                    @if (stajBitti)
+                                    { <span class="badge bg-secondary">Staj bitti</span> }
+                                    else if (s.Aktif)
+                                    { <span class="badge bg-success">Aktif</span> }
+                                    else
+                                    { <span class="badge bg-warning">Pasif</span> }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (!Model.Any())
+            {
+                <p class="text-muted mb-0">Kayıt bulunamadı.</p>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var input = document.getElementById('stajyerArama');
+    var tbody = document.getElementById('stajyerTbody');
+    var toplamSpan = document.getElementById('stajyerToplam');
+    if (!input || !tbody) return;
+    function filtrele() {
+        var metin = (input.value || '').trim().toLowerCase();
+        var satirlar = tbody.querySelectorAll('tr.stajyer-satir');
+        var gosterilen = 0;
+        satirlar.forEach(function (tr) {
+            var ara = (tr.getAttribute('data-ara') || '').toLowerCase();
+            var uyuyor = metin === '' || ara.indexOf(metin) !== -1;
+            tr.style.display = uyuyor ? '' : 'none';
+            if (uyuyor) gosterilen++;
+        });
+        if (toplamSpan) toplamSpan.textContent = gosterilen;
+    }
+    input.addEventListener('input', filtrele);
+    input.addEventListener('keyup', filtrele);
+})();
+</script>
+}

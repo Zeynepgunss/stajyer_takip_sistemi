@@ -1,0 +1,70 @@
+@model List<Entity.GunlukGorev>
+@{
+    ViewData["Title"] = "Görevlerim";
+}
+
+<div class="container">
+    <h2 class="mb-4">Tüm Görevlerim</h2>
+
+    @if (Model.Any())
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Tarih</th>
+                    <th>Yapılan İş</th>
+                    <th>Teknoloji</th>
+                    <th>Saat</th>
+                    <th>Dosya</th>
+                    <th>Durum</th>
+                    <th>Puan</th>
+                    <th>Yorum</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var gorev in Model)
+                {
+                    <tr>
+                        <td>@gorev.Tarih.ToString("dd.MM.yyyy")</td>
+                        <td>@gorev.YapilanIs</td>
+                        <td>@gorev.KullanilanTeknoloji</td>
+                        <td>@gorev.CalismaSaati saat</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(gorev.DosyaYolu))
+                            {
+                                <a href="@gorev.DosyaYolu" target="_blank" class="btn btn-sm btn-info">Görüntüle</a>
+                            }
+                        </td>
+                        <td>
+                            @if (gorev.Onaylandi)
+                            {
+                                <span class="badge bg-success">Onaylandı</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning">Onay Bekliyor</span>
+                            }
+                            @if (gorev.GecTeslim)
+                            {
+                                <span class="badge bg-danger">Geç Teslim</span>
+                            }
+                        </td>
+                        <td>
+                            @if (gorev.Puan.HasValue)
+                            {
+                                <span class="badge bg-info">@gorev.Puan</span>
+                            }
+                        </td>
+                        <td>@gorev.Yorum</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            Henüz görev eklenmemiş. <a asp-action="GunlukGorevEkle">İlk görevinizi ekleyin</a>
+        </div>
+    }
+</div>

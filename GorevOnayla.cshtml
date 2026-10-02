@@ -1,0 +1,55 @@
+@model Entity.GunlukGorev
+@{
+    ViewData["Title"] = "Görev Onayla";
+}
+
+<div class="container">
+    <h2 class="mb-4">Görev Onayla</h2>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>Stajyer: @Model.Stajyer?.User?.TamAd</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <strong>Tarih:</strong> @Model.Tarih.ToString("dd.MM.yyyy")
+            </div>
+            <div class="mb-3">
+                <strong>Yapılan İş:</strong>
+                <p>@Model.YapilanIs</p>
+            </div>
+            <div class="mb-3">
+                <strong>Kullanılan Teknoloji:</strong> @Model.KullanilanTeknoloji
+            </div>
+            <div class="mb-3">
+                <strong>Çalışma Saati:</strong> @Model.CalismaSaati saat
+            </div>
+            @if (!string.IsNullOrEmpty(Model.DosyaYolu))
+            {
+                <div class="mb-3">
+                    <strong>Dosya:</strong>
+                    <a href="@Model.DosyaYolu" target="_blank" class="btn btn-sm btn-info">Görüntüle</a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <form asp-action="GorevOnayla" method="post" class="mt-4">
+        <input type="hidden" name="id" value="@Model.Id" />
+        
+        <div class="mb-3">
+            <label for="puan" class="form-label">Puan (1-100)</label>
+            <input type="number" id="puan" name="puan" class="form-control" min="1" max="100" />
+        </div>
+
+        <div class="mb-3">
+            <label for="yorum" class="form-label">Yorum</label>
+            <textarea id="yorum" name="yorum" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-success">Onayla</button>
+            <a asp-action="Index" class="btn btn-secondary">Geri</a>
+        </div>
+    </form>
+</div>

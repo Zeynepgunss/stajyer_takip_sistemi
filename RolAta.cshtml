@@ -1,0 +1,53 @@
+@model Entity.ApplicationUser
+@{
+    ViewData["Title"] = "Rol Ata";
+    var mevcutRoller = ViewBag.MevcutRoller as IList<string> ?? new List<string>();
+}
+
+<div class="container">
+    <h2 class="mb-4">Rol Ata - @Model.TamAd</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <form asp-action="RolAta" method="post">
+        <input type="hidden" name="userId" value="@Model.Id" />
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>Mevcut Roller</h5>
+            </div>
+            <div class="card-body">
+                @if (mevcutRoller.Any())
+                {
+                    @foreach (var rol in mevcutRoller)
+                    {
+                        <span class="badge bg-primary me-2">@rol</span>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">Henüz rol atanmamış.</p>
+                }
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Manuel Görev</h5>
+            </div>
+            <div class="card-body">
+                <label for="manuelGorev" class="form-label fw-bold">Manuel Görev</label>
+                <input type="text" class="form-control" id="manuelGorev" name="manuelGorev" 
+                       placeholder="Görev açıklamasını buraya yazınız" />
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Kaydet</button>
+            <a asp-action="KullaniciYonetimi" class="btn btn-secondary">İptal</a>
+        </div>
+    </form>
+</div>

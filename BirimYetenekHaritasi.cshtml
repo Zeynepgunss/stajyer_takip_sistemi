@@ -1,0 +1,66 @@
+@model List<Entity.Stajyer>
+@{
+    ViewData["Title"] = "Birim Yetenek Haritası";
+    var tumYetenekler = ViewBag.TumYetenekler as List<Entity.Yetenek> ?? new List<Entity.Yetenek>();
+    var birim = ViewBag.Birim as Entity.Birim;
+}
+
+<div class="container">
+    <h2 class="mb-4">@birim?.Ad Birimi - Yetenek Haritası</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Stajyer</th>
+                        @foreach (var yetenek in tumYetenekler)
+                        {
+                            <th class="text-center">@yetenek.Ad</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var stajyer in Model)
+                    {
+                        <tr>
+                            <td><strong>@stajyer.User?.TamAd</strong></td>
+                            @foreach (var yetenek in tumYetenekler)
+                            {
+                                var stajyerYetenek = stajyer.Yetenekler.FirstOrDefault(sy => sy.YetenekId == yetenek.Id);
+                                <td class="text-center">
+                                    @if (stajyerYetenek != null)
+                                    {
+                                        <span class="badge bg-success">@stajyerYetenek.Seviye/5</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h5>Yetenek Özeti</h5>
+        <div class="row">
+            @foreach (var yetenek in tumYetenekler)
+            {
+                var buYetenekteStajyerSayisi = Model.Count(s => s.Yetenekler.Any(sy => sy.YetenekId == yetenek.Id));
+                <div class="col-md-3 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6>@yetenek.Ad</h6>
+                            <p class="mb-0">@buYetenekteStajyerSayisi stajyer</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

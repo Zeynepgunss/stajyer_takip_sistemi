@@ -1,0 +1,207 @@
+@model Entity.Etkinlik
+@{
+    ViewData["Title"] = Model.Ad;
+    var tarihiGecti = (Model.BitisTarihi ?? Model.Tarih).Date < DateTime.Today;
+    var kayitSayisi = Model.Kayitlar?.Count ?? 0;
+    var kontenjanDolu = Model.Kontenjan.HasValue && kayitSayisi >= Model.Kontenjan.Value;
+    var kullaniciKayitli = false;
+    if (User.Identity?.IsAuthenticated == true && Model.Kayitlar != null)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        kullaniciKayitli = Model.Kayitlar.Any(k => k.UserId == userId);
+    }
+}
+<div class="row mb-4">
+    <div class="col">
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm mb-2">&larr; Etkinliklere Dön</a>
+        @if (User.IsInRole("ITYoneticisi") || User.IsInRole("BirimSorumlusu"))
+        {
+            <a asp-action="Duzenle" asp-route-id="@Model.Id" class="btn btn-primary btn-sm mb-2">Etkinliği Güncelle</a>
+            <form asp-action="Sil" asp-route-id="@Model.Id" method="post" class="d-inline" onsubmit="return confirm('Bu etkinliği silmek istediğinize emin misiniz?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger btn-sm mb-2">Etkinliği Sil</button>
+            </form>
+        }
+        <h2 class="mb-2 mt-2" style="color: #2a5298;">@Model.Ad</h2>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col-12">
+        @{
+            var gorselSrc = !string.IsNullOrEmpty(Model.GorselDosyaAdi)
+                ? Url.Content("~/images/" + Model.GorselDosyaAdi)
+                : Url.Content("~/images/etkinlik.png");
+            var varsayilanGorsel = Url.Content("~/images/etkinlik.png");
+            
+            var placeholderDataUri = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22320%22 viewBox=%220 0 800 320%22%3E%3Crect fill=%22%23e9ecef%22 width=%22800%22 height=%22320%22/%3E%3Ctext fill=%22%236c757d%22 font-family=%22sans-serif%22 font-size=%2218%22 x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22%3EG%C3%B6rsel yok%3C/text%3E%3C/svg%3E";
+        }
+        <img src="@gorselSrc" alt="@Model.Ad" class="img-fluid rounded shadow-sm" style="width: 100%; max-height: 320px; object-fit: cover;"
+             onerror="this.onerror=null; this.src='@varsayilanGorsel'; this.onerror=function(){ this.src='@placeholderDataUri'; this.onerror=null; };" />
+    </div>
+</div>
+@if (tarihiGecti)
+{
+    <div class="alert alert-warning mb-3">
+        <strong>Tarihi geçmiş etkinlik.</strong> Bu etkinliğin tarihi geçmiştir; yeni kayıt kabul edilmemektedir.
+    </div>
+}
+@if (TempData["EtkinlikMesaj"] != null)
+{
+    <div class="alert alert-info">@TempData["EtkinlikMesaj"]</div>
+}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header" style="background-color: #2a5298; color: white;">
+                <strong>Detay</strong>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(Model.KisaAciklama))
+                {
+                    <p class="card-text text-muted">@Model.KisaAciklama</p>
+                }
+                @if (!string.IsNullOrEmpty(Model.Aciklama))
+                {
+                    <div class="card-text">@Html.Raw(Model.Aciklama)</div>
+                }
+                <hr />
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Başlangıç</dt>
+                    <dd class="col-sm-9">@Model.Tarih.ToString("dd MMMM yyyy HH:mm", new System.Globalization.CultureInfo("tr-TR"))</dd>
+                    @if (Model.BitisTarihi.HasValue)
+                    {
+                        <dt class="col-sm-3">Bitiş</dt>
+                        <dd class="col-sm-9">@Model.BitisTarihi.Value.ToString("dd MMMM yyyy HH:mm", new System.Globalization.CultureInfo("tr-TR"))</dd>
+                    }
+                    else
+                    {
+                        <dt class="col-sm-3">Saat</dt>
+                        <dd class="col-sm-9">@(Model.Saat ?? "-")</dd>
+                    }
+                    <dt class="col-sm-3">Yer</dt>
+                    <dd class="col-sm-9">@(Model.Yer ?? "-")</dd>
+                    @if (Model.Kontenjan.HasValue)
+                    {
+                        <dt class="col-sm-3">Kontenjan</dt>
+                        <dd class="col-sm-9">@kayitSayisi / @Model.Kontenjan</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        @if (User.IsInRole("BirimSorumlusu"))
+        {
+            var birimdenKayitlilar = ViewBag.BirimdenKayitlilar as List<Entity.EtkinlikKayit> ?? new List<Entity.EtkinlikKayit>();
+            <div class="card mb-4">
+                <div class="card-header" style="background-color: #2a5298; color: white;">
+                    <strong>Biriminizden Kayıt Olanlar</strong>
+                </div>
+                <div class="card-body">
+                    @if (birimdenKayitlilar.Any())
+                    {
+                        <input type="text" id="birimKayitArama" class="form-control form-control-sm mb-2" placeholder="Stajyer adı veya e-posta ile ara..." autocomplete="off" />
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 2rem;">#</th>
+                                        <th>Ad Soyad</th>
+                                        <th>E-posta</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="birimKayitListesi">
+                                    @{ var sira = 0; }
+                                    @foreach (var k in birimdenKayitlilar)
+                                    {
+                                        sira++;
+                                        var ad = k.KatilimciAdi ?? k.User?.TamAd ?? "Kayıtlı";
+                                        var email = k.KatilimciEmail ?? k.User?.Email ?? "";
+                                        <tr class="birim-kayit-satir" data-ara="@(ad + " " + email)">
+                                            <td class="text-muted">@sira</td>
+                                            <td class="fw-medium">@ad</td>
+                                            <td class="text-muted small">@(string.IsNullOrEmpty(email) ? "-" : email)</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-muted small mb-0 mt-2">Toplam: <strong id="birimKayitToplam">@birimdenKayitlilar.Count</strong> kişi</p>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Biriminizden bu etkinliğe kayıt olan bulunmuyor.</p>
+                    }
+                </div>
+            </div>
+        }
+        <div class="card">
+            <div class="card-header" style="background-color: #2a5298; color: white;">
+                <strong>Etkinliğe Katılım</strong>
+            </div>
+            <div class="card-body">
+                @if (tarihiGecti)
+                {
+                    <p class="text-muted mb-0">Bu etkinliğin tarihi geçmiştir. Yeni kayıt alınmamaktadır.</p>
+                    @if (kullaniciKayitli)
+                    {
+                        <p class="text-success small mt-2 mb-0">Bu etkinliğe daha önce kayıt olmuştunuz.</p>
+                    }
+                }
+                else if (User.Identity?.IsAuthenticated != true)
+                {
+                    <p class="text-muted small mb-3">Etkinliğe kayıt olmak için önce sisteme giriş yapmanız veya kayıt olmanız gerekir.</p>
+                    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Detay", "Etkinlikler", new { id = Model.Id })" class="btn btn-primary btn-sm me-2">Giriş Yap</a>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-primary btn-sm">Kayıt Ol</a>
+                }
+                else if (kullaniciKayitli)
+                {
+                    <p class="text-success mb-0">Bu etkinliğe kayıtlısınız.</p>
+                }
+                else if (kontenjanDolu)
+                {
+                    <p class="text-danger mb-0">Kontenjan dolmuştur.</p>
+                }
+                else
+                {
+                    <p class="text-muted small mb-3">Giriş yaptığınız hesap bilgilerinizle etkinliğe kayıt olunacaktır.</p>
+                    <form asp-action="Kayit" method="post">
+                        <input type="hidden" name="etkinlikId" value="@Model.Id" />
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Kayıt Ol</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var input = document.getElementById('birimKayitArama');
+    var list = document.getElementById('birimKayitListesi');
+    var toplamSpan = document.getElementById('birimKayitToplam');
+    if (!input || !list) return;
+    function filtrele() {
+        var metin = (input.value || '').trim().toLowerCase();
+        var satirlar = list.querySelectorAll('tr.birim-kayit-satir');
+        var gosterilen = 0;
+        var no = 1;
+        satirlar.forEach(function (tr) {
+            var ara = (tr.getAttribute('data-ara') || '').toLowerCase();
+            var uyuyor = metin === '' || ara.indexOf(metin) !== -1;
+            tr.style.display = uyuyor ? '' : 'none';
+            if (uyuyor) {
+                var firstCell = tr.querySelector('td:first-child');
+                if (firstCell) firstCell.textContent = no++;
+                gosterilen++;
+            }
+        });
+        if (toplamSpan) toplamSpan.textContent = gosterilen;
+    }
+    input.addEventListener('input', filtrele);
+    input.addEventListener('keyup', filtrele);
+})();
+</script>
+}

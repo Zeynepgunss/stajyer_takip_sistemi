@@ -1,0 +1,113 @@
+@model Entity.Stajyer
+@{
+    ViewData["Title"] = "Stajyer Ekle";
+    var birimler = ViewBag.Birimler as List<Entity.Birim> ?? new List<Entity.Birim>();
+}
+<style>
+    .stajyer-ekle-page .btn-primary {
+        background-color: #2a5298;
+        border-color: #2a5298;
+        color: #fff;
+    }
+    .stajyer-ekle-page .btn-primary:hover {
+        background-color: #1a3a6e;
+        border-color: #1a3a6e;
+        color: #fff;
+    }
+</style>
+<div class="container stajyer-ekle-page">
+    <h2 class="mb-4">Yeni Stajyer Ekle</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <form asp-action="StajyerEkle" method="post">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="KullaniciAdi" class="form-label">Kullanıcı Adı <span class="text-danger">*</span></label>
+                <input type="text" id="KullaniciAdi" name="KullaniciAdi" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label for="KullaniciSoyadi" class="form-label">Kullanıcı Soyadı <span class="text-danger">*</span></label>
+                <input type="text" id="KullaniciSoyadi" name="KullaniciSoyadi" class="form-control" required />
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="KullaniciEmail" class="form-label">Email <span class="text-danger">*</span></label>
+            <input type="email" id="KullaniciEmail" name="KullaniciEmail" class="form-control" required />
+        </div>
+
+        <hr class="my-4" />
+        <h5 class="mb-3">Birim ve Eğitim Bilgileri</h5>
+
+        <div class="mb-3">
+            <label asp-for="BirimId" class="form-label">Birim <span class="text-danger">*</span></label>
+            <select asp-for="BirimId" class="form-select" required>
+                <option value="">Seçiniz...</option>
+                @foreach (var birim in birimler)
+                {
+                    var bosKontenjan = birim.Kontenjan - birim.MevcutStajyerSayisi;
+                    <option value="@birim.Id">@birim.Ad (Boş: @bosKontenjan)</option>
+                }
+            </select>
+            <span asp-validation-for="BirimId" class="text-danger"></span>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label asp-for="Okul" class="form-label">Okul</label>
+                <input asp-for="Okul" class="form-control" />
+                <span asp-validation-for="Okul" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Bolum" class="form-label">Bölüm</label>
+                <input asp-for="Bolum" class="form-control" />
+                <span asp-validation-for="Bolum" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Sinif" class="form-label">Sınıf</label>
+                <input asp-for="Sinif" class="form-control" />
+                <span asp-validation-for="Sinif" class="text-danger"></span>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+        <h5 class="mb-3">Staj Bilgileri</h5>
+
+        <div class="mb-3">
+            <label asp-for="BaslangicTarihi" class="form-label">Başlangıç Tarihi</label>
+            <input asp-for="BaslangicTarihi" type="date" class="form-control" required />
+            <span asp-validation-for="BaslangicTarihi" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="BitisTarihi" class="form-label">Bitiş Tarihi</label>
+            <input asp-for="BitisTarihi" type="date" class="form-control" required />
+            <span asp-validation-for="BitisTarihi" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Kaydet</button>
+            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

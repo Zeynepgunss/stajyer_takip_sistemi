@@ -1,0 +1,64 @@
+@model Entity.GunlukGorev
+@{
+    ViewData["Title"] = "Günlük Görev Ekle";
+}
+<style>
+    .gunluk-gorev-page .btn-primary {
+        background-color: #2a5298;
+        border-color: #2a5298;
+        color: #fff;
+    }
+    .gunluk-gorev-page .btn-primary:hover {
+        background-color: #1a3a6e;
+        border-color: #1a3a6e;
+        color: #fff;
+    }
+</style>
+<div class="container gunluk-gorev-page">
+    <h2 class="mb-4">Günlük Görev Ekle</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <form asp-action="GunlukGorevEkle" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label asp-for="Tarih" class="form-label">Tarih</label>
+            <input asp-for="Tarih" type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+            <span asp-validation-for="Tarih" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="YapilanIs" class="form-label">Yapılan İş</label>
+            <textarea asp-for="YapilanIs" class="form-control" rows="5" required></textarea>
+            <span asp-validation-for="YapilanIs" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="KullanilanTeknoloji" class="form-label">Kullanılan Teknoloji (C#, SQL, React, vb.)</label>
+            <input asp-for="KullanilanTeknoloji" class="form-control" placeholder="Örn: C#, SQL Server, React" />
+            <span asp-validation-for="KullanilanTeknoloji" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CalismaSaati" class="form-label">Çalışma Saati</label>
+            <input asp-for="CalismaSaati" type="number" step="0.5" min="0" max="24" class="form-control" required />
+            <span asp-validation-for="CalismaSaati" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="dosya" class="form-label">Ekran Görüntüsü / Dosya </label>
+            <input type="file" id="dosya" name="dosya" class="form-control" accept="image/*,.pdf,.doc,.docx" />
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Kaydet</button>
+            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

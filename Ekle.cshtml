@@ -1,0 +1,111 @@
+@model Entity.Etkinlik
+@{
+    ViewData["Title"] = "Etkinlik Ekle";
+    var baslangicStr = Model.Tarih.ToString("yyyy-MM-ddTHH:mm");
+    var bitisStr = Model.BitisTarihi?.ToString("yyyy-MM-ddTHH:mm") ?? DateTime.Now.AddHours(2).ToString("yyyy-MM-ddTHH:mm");
+}
+
+<div class="container">
+    <h2 class="mb-4">Etkinlik Ekle</h2>
+
+    <form asp-action="Ekle" method="post" enctype="multipart/form-data" id="etkinlikForm">
+        @Html.AntiForgeryToken()
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <label for="Ad" class="form-label">Etkinlik Başlığı <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="Ad" name="Ad" value="@Model.Ad" maxlength="255" placeholder="Etkinlik başlığını giriniz" required />
+                        <small class="text-muted"><span id="adCounter">@(Model.Ad?.Length ?? 0)</span>/255 karakter</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Etkinlik Aktif</label>
+                        <div class="form-check form-switch mt-2">
+                            <input type="hidden" name="Aktif" value="false" />
+                            <input class="form-check-input" type="checkbox" id="Aktif" name="Aktif" value="true" @(Model.Aktif ? "checked" : "") />
+                            <label class="form-check-label" for="Aktif">Aktif</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="Tarih" class="form-label">Başlangıç Tarihi ve Saati <span class="text-danger">*</span></label>
+                        <input type="datetime-local" class="form-control" id="Tarih" name="Tarih" value="@baslangicStr" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="BitisTarihi" class="form-label">Bitiş Tarihi ve Saati <span class="text-danger">*</span></label>
+                        <input type="datetime-local" class="form-control" id="BitisTarihi" name="BitisTarihi" value="@bitisStr" required />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="etkinlikResmi" class="form-label">Etkinlik Resmi</label>
+                    <input type="file" class="form-control" id="etkinlikResmi" name="etkinlikResmi" accept=".jpg,.jpeg,.png" />
+                    <small class="text-muted">JPG, JPEG veya PNG formatında, maksimum 2MB boyutunda dosya yükleyebilirsiniz.</small>
+                </div>
+                <div class="mb-3">
+                    <label for="KisaAciklama" class="form-label">Kısa Açıklama</label>
+                    <textarea class="form-control" id="KisaAciklama" name="KisaAciklama" rows="3" maxlength="512" placeholder="Etkinlik hakkında kısa açıklama">@Model.KisaAciklama</textarea>
+                    <small class="text-muted"><span id="kisaCounter">@(Model.KisaAciklama?.Length ?? 0)</span>/512 karakter</small>
+                </div>
+                <div class="mb-3">
+                    <label for="Aciklama" class="form-label">Detaylı Açıklama</label>
+                    <div id="detayEditor" class="border rounded p-2" style="min-height: 120px;"></div>
+                    <input type="hidden" id="Aciklama" name="Aciklama" value="@Model.Aciklama" />
+                    <small class="text-muted">Etkinlik hakkında detaylı açıklama</small>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="Yer" class="form-label">Yer</label>
+                        <input type="text" class="form-control" id="Yer" name="Yer" value="@Model.Yer" placeholder="Örn. Kongre Merkezi" />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="Kontenjan" class="form-label">Kontenjan</label>
+                        <input type="number" class="form-control" id="Kontenjan" name="Kontenjan" value="@Model.Kontenjan" min="0" placeholder="Boş bırakılabilir" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <button type="submit" class="btn text-white" style="background-color: #212529; border-color: #212529;">
+                <span class="me-1">Kaydet</span>
+            </button>
+            <a asp-action="Index" class="btn btn-link text-secondary">Etkinliği İptal Et</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <script>
+        (function () {
+            document.getElementById('Ad').addEventListener('input', function () {
+                document.getElementById('adCounter').textContent = this.value.length;
+            });
+            document.getElementById('KisaAciklama').addEventListener('input', function () {
+                document.getElementById('kisaCounter').textContent = this.value.length;
+            });
+
+            var aciklamaValue = document.getElementById('Aciklama').value;
+            var quill = new Quill('#detayEditor', {
+                theme: 'snow',
+                placeholder: 'Etkinlik hakkında detaylı açıklama',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'align': [] }],
+                        ['link', 'blockquote'],
+                        ['clean']
+                    ]
+                }
+            });
+            if (aciklamaValue) quill.root.innerHTML = aciklamaValue;
+
+            document.getElementById('etkinlikForm').addEventListener('submit', function () {
+                document.getElementById('Aciklama').value = quill.root.innerHTML;
+            });
+        })();
+    </script>
+}

@@ -1,0 +1,124 @@
+@model Entity.Stajyer
+@{
+    ViewData["Title"] = "Stajyer Detay";
+    var kalanGun = ViewBag.KalanGun as int? ?? 0;
+}
+
+<div class="container">
+    <h2 class="mb-4">Stajyer Detay - @Model.User?.TamAd</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Kişisel Bilgiler</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Ad Soyad:</strong> @Model.User?.TamAd</p>
+                    <p><strong>Email:</strong> @Model.User?.Email</p>
+                    <p><strong>Okul:</strong> @Model.Okul</p>
+                    <p><strong>Bölüm:</strong> @Model.Bolum</p>
+                    <p><strong>Sınıf:</strong> @Model.Sinif</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Staj Bilgileri</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Birim:</strong> @Model.Birim?.Ad</p>
+                    <p><strong>Başlangıç:</strong> @Model.BaslangicTarihi.ToString("dd.MM.yyyy")</p>
+                    <p><strong>Bitiş:</strong> @Model.BitisTarihi.ToString("dd.MM.yyyy")</p>
+                    <p><strong>Kalan Gün:</strong> @kalanGun gün</p>
+                    <p><strong>Devam Oranı:</strong> @Model.TamamlananGun / @Model.ToplamGun gün</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Yetenekler</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Yetenekler.Any())
+                    {
+                        <div class="row">
+                            @foreach (var yetenek in Model.Yetenekler)
+                            {
+                                <div class="col-md-3 mb-2">
+                                    <span class="badge bg-primary">@yetenek.Yetenek?.Ad (@yetenek.Seviye/5)</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Henüz yetenek eklenmemiş.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Görevler</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.GunlukGorevler.Any())
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Yapılan İş</th>
+                                    <th>Teknoloji</th>
+                                    <th>Saat</th>
+                                    <th>Durum</th>
+                                    <th>Puan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var gorev in Model.GunlukGorevler.OrderByDescending(g => g.Tarih))
+                                {
+                                    <tr>
+                                        <td>@gorev.Tarih.ToString("dd.MM.yyyy")</td>
+                                        <td>@(gorev.YapilanIs?.Length > 50 ? gorev.YapilanIs.Substring(0, 50) + "..." : gorev.YapilanIs)</td>
+                                        <td>@gorev.KullanilanTeknoloji</td>
+                                        <td>@gorev.CalismaSaati saat</td>
+                                        <td>
+                                            @if (gorev.Onaylandi)
+                                            {
+                                                <span class="badge bg-success">Onaylandı</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning">Onay Bekliyor</span>
+                                            }
+                                        </td>
+                                        <td>@(gorev.Puan?.ToString() ?? "-")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Henüz görev eklenmemiş.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">Geri</a>
+    </div>
+</div>

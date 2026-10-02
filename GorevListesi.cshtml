@@ -1,0 +1,83 @@
+@model List<Entity.GunlukGorev>
+@{
+    ViewData["Title"] = ViewBag.Baslik ?? "Görev Listesi";
+    var baslik = ViewBag.Baslik as string ?? "Görev Listesi";
+    var onayBekleyen = ViewBag.OnayBekleyen as bool? ?? false;
+}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">@baslik</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">&larr; Panele Dön</a>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <p class="text-muted mb-0">Toplam: <strong id="gorevToplam">@Model.Count</strong> görev</p>
+                <input type="text" id="gorevArama" class="form-control form-control-sm" style="max-width: 320px;" placeholder="Stajyer, birim, yapılan iş veya teknoloji ile ara..." autocomplete="off" />
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Stajyer</th>
+                            <th>Birim</th>
+                            <th>Tarih</th>
+                            <th>Yapılan İş</th>
+                            <th>Teknoloji</th>
+                            <th>Onay</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gorevTbody">
+                        @foreach (var g in Model)
+                        {
+                            var yapilanIs = string.IsNullOrEmpty(g.YapilanIs) ? "-" : (g.YapilanIs.Length > 50 ? g.YapilanIs.Substring(0, 50) + "…" : g.YapilanIs);
+                            var onay = g.Onaylandi ? "Onaylandı" : "Bekliyor";
+                            <tr class="gorev-satir" data-ara="@((g.Stajyer?.User?.TamAd ?? "-") + " " + (g.Stajyer?.Birim?.Ad ?? "-") + " " + yapilanIs + " " + (g.KullanilanTeknoloji ?? "-") + " " + onay)">
+                                <td>@(g.Stajyer?.User?.TamAd ?? "-")</td>
+                                <td>@(g.Stajyer?.Birim?.Ad ?? "-")</td>
+                                <td>@g.Tarih.ToString("dd.MM.yyyy")</td>
+                                <td>@yapilanIs</td>
+                                <td>@(g.KullanilanTeknoloji ?? "-")</td>
+                                <td>
+                                    @if (g.Onaylandi)
+                                    { <span class="badge bg-success">Onaylandı</span> }
+                                    else
+                                    { <span class="badge bg-warning">Bekliyor</span> }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (!Model.Any())
+            {
+                <p class="text-muted mb-0">Kayıt bulunamadı.</p>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var input = document.getElementById('gorevArama');
+    var tbody = document.getElementById('gorevTbody');
+    var toplamSpan = document.getElementById('gorevToplam');
+    if (!input || !tbody) return;
+    function filtrele() {
+        var metin = (input.value || '').trim().toLowerCase();
+        var satirlar = tbody.querySelectorAll('tr.gorev-satir');
+        var gosterilen = 0;
+        satirlar.forEach(function (tr) {
+            var ara = (tr.getAttribute('data-ara') || '').toLowerCase();
+            var uyuyor = metin === '' || ara.indexOf(metin) !== -1;
+            tr.style.display = uyuyor ? '' : 'none';
+            if (uyuyor) gosterilen++;
+        });
+        if (toplamSpan) toplamSpan.textContent = gosterilen;
+    }
+    input.addEventListener('input', filtrele);
+    input.addEventListener('keyup', filtrele);
+})();
+</script>
+}

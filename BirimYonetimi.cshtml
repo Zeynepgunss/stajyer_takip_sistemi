@@ -1,0 +1,72 @@
+@model List<Entity.Birim>
+@{
+    ViewData["Title"] = "Birim Yönetimi";
+}
+<style>
+    
+    .btn-primary {
+        background-color: #2a5298 !important;
+        border-color: #2a5298 !important;
+        color: #fff !important;
+        transition: background-color 0.3s ease; 
+    }
+
+        
+        .btn-primary:hover {
+            background-color: #1a3a6e !important;
+            border-color: #1a3a6e !important;
+            color: #fff !important;
+        }
+</style>
+<div class="container">
+    <h2 class="mb-4">Birim Yönetimi</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="mb-3">
+        <a asp-action="BirimEkle" class="btn btn-primary">Yeni Birim Ekle</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Birim Adı</th>
+                        <th>Kontenjan</th>
+                        <th>Mevcut Stajyer</th>
+                        <th>Boş Kontenjan</th>
+                        <th>Sorumlular</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var birim in Model)
+                    {
+                        <tr>
+                            <td>@birim.Ad</td>
+                            <td>@birim.Kontenjan</td>
+                            <td>@birim.MevcutStajyerSayisi</td>
+                            <td>@(birim.Kontenjan - birim.MevcutStajyerSayisi)</td>
+                            <td>
+                                @foreach (var sorumlu in birim.Sorumlular)
+                                {
+                                    <span class="badge bg-info">@sorumlu.User?.TamAd</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="BirimDuzenle" asp-route-id="@birim.Id" class="btn btn-sm btn-warning">Düzenle</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

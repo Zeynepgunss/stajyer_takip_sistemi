@@ -1,0 +1,80 @@
+@model List<Entity.ApplicationUser>
+@{
+    ViewData["Title"] = "Kullanıcı Yönetimi";
+    var kullaniciRolleri = ViewBag.KullaniciRolleri as Dictionary<string, List<string>> ?? new Dictionary<string, List<string>>();
+}
+<style>
+    .kullanici-yonetimi-page .btn-primary {
+        background-color: #2a5298;
+        border-color: #2a5298;
+        color: #fff;
+    }
+    .kullanici-yonetimi-page .btn-primary:hover {
+        background-color: #1a3a6e;
+        border-color: #1a3a6e;
+        color: #fff;
+    }
+</style>
+<div class="container kullanici-yonetimi-page">
+    <h2 class="mb-4">Kullanıcı Yönetimi</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-3">
+                <input type="text" id="kullaniciArama" class="form-control form-control-sm" style="max-width: 320px;" placeholder="Ad, soyad, e-posta veya rol ile ara..." autocomplete="off" />
+            </div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Ad Soyad</th>
+                        <th>Email</th>
+                        <th>Roller</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody id="kullaniciTbody">
+                    @foreach (var kullanici in Model)
+                    {
+                        var roller = kullaniciRolleri.ContainsKey(kullanici.Id)
+                            ? kullaniciRolleri[kullanici.Id]
+                            : new List<string>();
+                        var araMetin = (kullanici.TamAd ?? "") + " " + (kullanici.Email ?? "") + " " + string.Join(" ", roller);
+                        <tr class="kullanici-satir" data-ara="@araMetin">
+                            <td>@kullanici.TamAd</td>
+                            <td>@kullanici.Email</td>
+                            <td>
+                                @foreach (var rol in roller)
+                                {
+                                    <span class="badge bg-info">@rol</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="RolAta" asp-route-userId="@kullanici.Id" class="btn btn-sm btn-primary">Görev Ata</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var input = document.getElementById('kullaniciArama');
+    var tbody = document.getElementById('kullaniciTbody');
+    if (!input || !tbody) return;
+    function filtrele() {
+        var metin = (input.value || '').trim().toLowerCase();
+        var satirlar = tbody.querySelectorAll('tr.kullanici-satir');
+        satirlar.forEach(function (tr) {
+            var ara = (tr.getAttribute('data-ara') || '').toLowerCase();
+            tr.style.display = (metin === '' || ara.indexOf(metin) !== -1) ? '' : 'none';
+        });
+    }
+    input.addEventListener('input', filtrele);
+    input.addEventListener('keyup', filtrele);
+})();
+</script>
+}

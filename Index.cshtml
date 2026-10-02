@@ -1,0 +1,164 @@
+@model Entity.Stajyer
+@{
+    ViewData["Title"] = "Stajyer Takip";
+    var kalanGun = ViewBag.KalanGun as int? ?? 0;
+    var toplamIsGunu = ViewBag.ToplamIsGunu as int? ?? Model.ToplamGun;
+    var tamamlananIsGunu = ViewBag.TamamlananIsGunu as int? ?? Model.TamamlananGun;
+    var sonGorevler = ViewBag.SonGorevler as List<Entity.GunlukGorev> ?? new List<Entity.GunlukGorev>();
+    var sonPerformans = ViewBag.SonPerformans as Entity.PerformansSkoru;
+    var manuelGorevler = ViewBag.ManuelGorevler as List<Entity.ManuelGorev> ?? new List<Entity.ManuelGorev>();
+
+    var devamOrani = toplamIsGunu > 0 ? (decimal)(tamamlananIsGunu * 100.0 / toplamIsGunu) : 0;
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4">Hoş Geldiniz, @Model.User?.TamAd</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Kalan Gün</h5>
+                    <h2>@kalanGun</h2>
+                    @{
+                        var bitisTarihiGoster = Model.BitisTarihi != default(DateTime) && Model.BitisTarihi.Year >= 2000;
+                    }
+                    @if (bitisTarihiGoster)
+                    {
+                        <p class="card-text">Staj bitiş: @Model.BitisTarihi.ToString("dd.MM.yyyy")</p>
+                    }
+                    else
+                    {
+                        <p class="card-text text-muted">Staj bitiş tarihi belirtilmemiş</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Devam Oranı</h5>
+                    <h2>@tamamlananIsGunu / @toplamIsGunu</h2>
+                    <p class="card-text">gün</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Birim</h5>
+                    <h4>@Model.Birim?.Ad</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Performans Skoru</h5>
+                    @{
+                        var stajBitti = Model.BitisTarihi != default(DateTime) && Model.BitisTarihi.Year >= 2000 && DateTime.Now >= Model.BitisTarihi;
+                        var gosterilecekPuan = stajBitti && sonPerformans != null && sonPerformans.SorumluFinalPuanı.HasValue 
+                            ? sonPerformans.SorumluFinalPuanı.Value.ToString("F1") 
+                            : "0";
+                    }
+                    <h2>@gosterilecekPuan</h2>
+                    @if (stajBitti && sonPerformans != null && sonPerformans.SorumluFinalPuanı.HasValue)
+                    {
+                        <p class="card-text">Sorumlu Değerlendirmesi</p>
+                    }
+                    else
+                    {
+                        <p class="card-text">Staj devam ediyor</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Son Görevlerim</h5>
+                    <a asp-action="GunlukGorevEkle" class="btn btn-sm btn-primary">Yeni Görev Ekle</a>
+                </div>
+                <div class="card-body">
+                    @if (sonGorevler.Any())
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Yapılan İş</th>
+                                    <th>Saat</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var gorev in sonGorevler)
+                                {
+                                    <tr>
+                                        <td>@gorev.Tarih.ToString("dd.MM.yyyy")</td>
+                                        <td>@(gorev.YapilanIs?.Length > 50 ? gorev.YapilanIs.Substring(0, 50) + "..." : gorev.YapilanIs)</td>
+                                        <td>@gorev.CalismaSaati saat</td>
+                                        <td>
+                                            @if (gorev.Onaylandi)
+                                            {
+                                                <span class="badge bg-success">Onaylandı</span>
+                                                @if (gorev.Puan.HasValue)
+                                                {
+                                                    <span class="badge bg-info">Puan: @gorev.Puan</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning">Onay Bekliyor</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Henüz görev eklenmemiş.</p>
+                    }
+                </div>
+            </div>
+
+            @if (manuelGorevler.Any())
+            {
+                <div class="card mt-3">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">Atanan Görevler</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            @foreach (var g in manuelGorevler)
+                            {
+                                <li class="list-group-item px-0">
+                                    <small class="text-muted">@g.OlusturmaTarihi.ToString("dd.MM.yyyy HH:mm")</small>
+                                    <p class="mb-0 mt-1">@g.Aciklama</p>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>Hızlı İşlemler</h5>
+                </div>
+                <div class="card-body">
+                    <a asp-action="GunlukGorevEkle" class="btn btn-primary w-100 mb-2">Günlük Görev Ekle</a>
+                    <a asp-action="Gorevlerim" class="btn btn-secondary w-100 mb-2">Tüm Görevlerim</a>
+                    <a asp-action="Performans" class="btn btn-info w-100 mb-2">Performans Raporu</a>
+                    <a asp-action="Yeteneklerim" class="btn btn-success w-100">Yeteneklerim</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

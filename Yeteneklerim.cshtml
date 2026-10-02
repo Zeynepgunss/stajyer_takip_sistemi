@@ -1,0 +1,166 @@
+@model Entity.Stajyer
+@{
+    ViewData["Title"] = "Yeteneklerim";
+    var tumYetenekler = ViewBag.TumYetenekler as List<Entity.Yetenek> ?? new List<Entity.Yetenek>();
+}
+<style>
+    .yeteneklerim-page .btn-primary {
+        background-color: #2a5298;
+        border-color: #2a5298;
+        color: #fff;
+    }
+    .yeteneklerim-page .btn-primary:hover {
+        background-color: #1a3a6e;
+        border-color: #1a3a6e;
+        color: #fff;
+    }
+</style>
+<div class="container yeteneklerim-page">
+    <h2 class="mb-4">Yeteneklerim</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Mevcut Yeteneklerim</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Yetenekler.Any())
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Yetenek</th>
+                                    <th>Kategori</th>
+                                    <th>Seviye</th>
+                                    <th>İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var yetenek in Model.Yetenekler)
+                                {
+                                    <tr>
+                                        <td>@yetenek.Yetenek?.Ad</td>
+                                        <td>@yetenek.Yetenek?.Kategori</td>
+                                        <td>
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                if (i <= yetenek.Seviye)
+                                                {
+                                                    <span class="text-warning">★</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">☆</span>
+                                                }
+                                            }
+                                            (@yetenek.Seviye/5)
+                                        </td>
+                                        <td>
+                                            <form asp-action="YetenekEkle" method="post" class="d-inline">
+                                                <input type="hidden" name="yetenekId" value="@yetenek.YetenekId" />
+                                                <select name="seviye" class="form-select form-select-sm d-inline-block" style="width: auto;">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        <option value="@i" selected="@(i == yetenek.Seviye)">@i</option>
+                                                    }
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-primary">Güncelle</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Henüz yetenek eklenmemiş.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Yeni Yetenek Ekle</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="YetenekEkle" method="post" id="yetenekForm">
+                        <div class="mb-3">
+                            <label class="form-label">Yetenek Seçin veya Manuel Girin</label>
+                            <select id="yetenekId" name="yetenekId" class="form-select mb-2">
+                                <option value="">Seçiniz...</option>
+                                @foreach (var yetenek in tumYetenekler)
+                                {
+                                    <option value="@yetenek.Id">@yetenek.Ad (@yetenek.Kategori)</option>
+                                }
+                            </select>
+                            <div class="text-center text-muted mb-2">veya</div>
+                            <input type="text" id="yetenekAdi" name="yetenekAdi" class="form-control" placeholder="Yeni yetenek adı girin (örn: C vb. gibi)" />
+                           
+                        </div>
+                        <div class="mb-3">
+                            <label for="seviye" class="form-label">Seviye (1-5)</label>
+                            <select id="seviye" name="seviye" class="form-select" required>
+                                <option value="1">1 - Başlangıç</option>
+                                <option value="2">2 - Temel</option>
+                                <option value="3">3 - Orta</option>
+                                <option value="4">4 - İleri</option>
+                                <option value="5">5 - Uzman</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Ekle</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var yetenekIdSelect = document.getElementById('yetenekId');
+            var yetenekAdiInput = document.getElementById('yetenekAdi');
+            var yetenekForm = document.getElementById('yetenekForm');
+
+            // Dropdown seçildiğinde text input'u temizle
+            yetenekIdSelect.addEventListener('change', function() {
+                if (this.value !== '') {
+                    yetenekAdiInput.value = '';
+                }
+            });
+
+            // Text input'a yazıldığında dropdown'ı temizle
+            yetenekAdiInput.addEventListener('input', function() {
+                if (this.value.trim() !== '') {
+                    yetenekIdSelect.value = '';
+                }
+            });
+
+            // Form submit validasyonu
+            yetenekForm.addEventListener('submit', function(e) {
+                var yetenekId = yetenekIdSelect.value;
+                var yetenekAdi = yetenekAdiInput.value.trim();
+
+                if (!yetenekId && !yetenekAdi) {
+                    e.preventDefault();
+                    alert('Lütfen bir yetenek seçin veya manuel olarak yetenek adı girin.');
+                    return false;
+                }
+            });
+        });
+    </script>
+}

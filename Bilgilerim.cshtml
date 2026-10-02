@@ -1,0 +1,230 @@
+@model Entity.Stajyer
+@{
+    ViewData["Title"] = "Bilgilerim";
+    var toplamIsGunu = ViewBag.ToplamIsGunu as int? ?? 0;
+}
+<style>
+    .bilgilerim-page .card:first-child .card-header.bg-primary {
+        background-color: #e8eef5 !important;
+    }
+    .bilgilerim-page .card:first-child .card-header.bg-primary h5,
+    .bilgilerim-page .card:first-child .card-header.bg-primary .bi {
+        color: #2a5298 !important;
+    }
+    .bilgilerim-page .card-header.bg-success {
+        background-color: #e8eef5 !important;
+    }
+    .bilgilerim-page .card-header.bg-success h5,
+    .bilgilerim-page .card-header.bg-success .bi,
+    .bilgilerim-page .card-header.bg-success svg {
+        color: #2a5298 !important;
+        fill: #2a5298 !important;
+    }
+    .bilgilerim-page .btn-primary {
+        background-color: #2a5298;
+        border-color: #2a5298;
+        color: #fff;
+    }
+    .bilgilerim-page .btn-primary:hover {
+        background-color: #1a3a6e;
+        border-color: #1a3a6e;
+        color: #fff;
+    }
+</style>
+<div class="container-fluid bilgilerim-page">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-4">Bilgilerim</h2>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Sol Taraf - Staj Bilgileri -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-info-circle me-2" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                        </svg>
+                        Staj Bilgileri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted">Staj Başlangıç Tarihi</label>
+                        <div class="p-2 bg-light rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-event me-2 text-primary" viewBox="0 0 16 16">
+                                <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
+                                <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                            </svg>
+                            @{
+                                var baslangicBos = Model.BaslangicTarihi == default(DateTime) || Model.BaslangicTarihi.Year < 2000;
+                            }
+                            <span class="fs-5 @(baslangicBos ? "text-muted fst-italic" : "")">
+                                @(baslangicBos ? "Henüz belirtilmemiş" : Model.BaslangicTarihi.ToString("dd.MM.yyyy"))
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted">Staj Bitiş Tarihi</label>
+                        <div class="p-2 bg-light rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-check me-2 text-success" viewBox="0 0 16 16">
+                                <path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
+                                <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                            </svg>
+                            @{
+                                var bitisBos = Model.BitisTarihi == default(DateTime) || Model.BitisTarihi.Year < 2000;
+                            }
+                            <span class="fs-5 @(bitisBos ? "text-muted fst-italic" : "")">
+                                @(bitisBos ? "Henüz belirtilmemiş" : Model.BitisTarihi.ToString("dd.MM.yyyy"))
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted">Toplam İş Günü</label>
+                        <div class="p-2 bg-light rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-week me-2 text-info" viewBox="0 0 16 16">
+                                <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm-3 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm-5 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zM3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                            </svg>
+                            <span class="fs-5 @(toplamIsGunu == 0 ? "text-muted fst-italic" : "")">
+                                @(toplamIsGunu == 0 ? "Henüz hesaplanmamış" : $"{toplamIsGunu} gün")
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted">Birim</label>
+                        <div class="p-2 bg-light rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-building me-2 text-warning" viewBox="0 0 16 16">
+                                <path d="M4 2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1ZM4 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1ZM7.5 5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1ZM4.5 8a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Z"/>
+                                <path d="M2 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V1Zm11 0H3v14h3v-2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V15h3V1Z"/>
+                            </svg>
+                            <span class="fs-5 @(Model.BirimId == 0 || Model.Birim == null ? "text-muted fst-italic" : "")">
+                                @(Model.BirimId == 0 || Model.Birim == null ? "Henüz atanmamış" : Model.Birim.Ad)
+                            </span>
+                        </div>
+                    </div>
+
+                    <hr class="my-3" />
+                    <h6 class="mb-3 fw-bold text-muted">Eğitim Bilgileri </h6>
+                    <form asp-action="EgitimBilgisiGuncelle" method="post" class="mb-0">
+                        @Html.AntiForgeryToken()
+                        <div class="row mb-2">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-muted small">Okul</label>
+                                <input type="text" name="okul" class="form-control form-control-sm" value="@(Model.Okul ?? "")" placeholder="Yazınız" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-muted small">Bölüm</label>
+                                <input type="text" name="bolum" class="form-control form-control-sm" value="@(Model.Bolum ?? "")" placeholder="Yazınız" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-muted small">Sınıf</label>
+                                <input type="text" name="sinif" class="form-control form-control-sm" value="@(Model.Sinif ?? "")" placeholder="Yazınız" />
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check-lg me-1" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/></svg>
+                                Eğitim Bilgisini Kaydet
+                            </button>
+                            <a asp-action="Duzenle" class="btn btn-sm btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-pencil me-1" viewBox="0 0 16 16">
+                                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.11.11-1.99 4.99a.5.5 0 0 0 .22.605l2.5 1.5a.5.5 0 0 0 .605-.22l4.99-1.99.11-.11a.5.5 0 0 0 0-.707l-1-1a.5.5 0 0 0-.707 0z"/>
+                                </svg>
+                                Bilgileri Düzenle
+                            </a>
+                            <a asp-action="Index" class="btn btn-sm btn-secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                                </svg>
+                                Anasayfaya Dön
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ Taraf - Yeteneklerim -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-star me-2" viewBox="0 0 16 16">
+                            <path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288L8 2.223l1.847 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.565.565 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"/>
+                        </svg>
+                        Yeteneklerim
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Yetenekler != null && Model.Yetenekler.Any())
+                    {
+                        <div class="row">
+                            @foreach (var stajyerYetenek in Model.Yetenekler.OrderBy(y => y.Yetenek?.Ad))
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <div class="p-3 border rounded">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="mb-0 fw-bold">@stajyerYetenek.Yetenek?.Ad</h6>
+                                            <span class="badge bg-primary">Seviye: @stajyerYetenek.Seviye</span>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(stajyerYetenek.Yetenek?.Kategori))
+                                        {
+                                            <small class="text-muted">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-tag me-1" viewBox="0 0 16 16">
+                                                    <path d="M6 4.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm-1 0a.5.5 0 1 0-1 0 .5.5 0 0 0 1 0z"/>
+                                                    <path d="M2 2h2.586a1 1 0 0 1 .707.293l7.414 7.414a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7.414-7.414A1 1 0 0 1 2 4.586V2zm2.586 1H2v2.586l7 7L13.586 9l-7-7z"/>
+                                                </svg>
+                                                @stajyerYetenek.Yetenek.Kategori
+                                            </small>
+                                        }
+                                        <div class="mt-2">
+                                            <div class="progress" style="height: 8px;">
+                                                <div class="progress-bar bg-success" role="progressbar" 
+                                                     style="width: @(stajyerYetenek.Seviye * 20)%" 
+                                                     aria-valuenow="@stajyerYetenek.Seviye" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="5">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-inbox text-muted mb-3" viewBox="0 0 16 16">
+                                <path d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4H4.98zm9.954 5H11.45a2.5 2.5 0 0 1-4.9 0H1.066l.32 2.562a.5.5 0 0 0 .497.438h12.234a.5.5 0 0 0 .496-.438L14.933 9zM3.809 3.563A1.5 1.5 0 0 1 4.981 3h6.038a1.5 1.5 0 0 1 1.172.563l3.7 4.625a.5.5 0 0 1 .105.374l-.39 3.124A1.5 1.5 0 0 1 14.117 13H1.883a1.5 1.5 0 0 1-1.489-1.314l-.39-3.124a.5.5 0 0 1 .106-.374l3.7-4.625z"/>
+                            </svg>
+                            <p class="text-muted">Henüz yetenek eklenmemiş.</p>
+                            <a asp-action="Yeteneklerim" class="btn btn-success btn-sm">Yetenek Ekle</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
